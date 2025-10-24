@@ -3,6 +3,16 @@
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
 
+#embed-cumulative-expenditures-over-time h1,
+#embed-cumulative-expenditures-over-time h2, 
+#embed-cumulative-expenditures-over-time h3,
+#embed-cumulative-expenditures-over-time .legend,
+#embed-cumulative-expenditures-over-time [class*="legend"],
+#embed-cumulative-expenditures-over-time [class*="title"],
+#embed-cumulative-expenditures-over-time label,
+#embed-cumulative-expenditures-over-time span {
+  color: #000000 !important;
+}
 
 #embed-cumulative-expenditures-over-time {
   overflow: hidden;

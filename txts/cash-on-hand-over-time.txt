@@ -3,7 +3,16 @@
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
 
-
+#embed-cash-on-hand-over-time h1,
+#embed-cash-on-hand-over-time h2, 
+#embed-cash-on-hand-over-time h3,
+#embed-cash-on-hand-over-time .legend,
+#embed-cash-on-hand-over-time [class*="legend"],
+#embed-cash-on-hand-over-time [class*="title"],
+#embed-cash-on-hand-over-time label,
+#embed-cash-on-hand-over-time span {
+  color: #000000 !important;
+}
 #embed-cash-on-hand-over-time {
   overflow: hidden;
   width: 100%;

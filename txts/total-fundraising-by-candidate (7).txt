@@ -3,7 +3,16 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-
+#embed-total-fundraising-by-candidate h1,
+#embed-total-fundraising-by-candidate h2, 
+#embed-total-fundraising-by-candidate h3,
+#embed-total-fundraising-by-candidate .legend,
+#embed-total-fundraising-by-candidate [class*="legend"],
+#embed-total-fundraising-by-candidate [class*="title"],
+#embed-total-fundraising-by-candidate label,
+#embed-total-fundraising-by-candidate span {
+  color: #000000 !important;
+}
 
 #embed-total-fundraising-by-candidate {
   overflow: hidden;

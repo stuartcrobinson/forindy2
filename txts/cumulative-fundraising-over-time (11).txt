@@ -2,7 +2,16 @@
 <div class="campaign-chart-embed" id="embed-cumulative-fundraising-over-time">
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
-
+#embed-cumulative-fundraising-over-time h1,
+#embed-cumulative-fundraising-over-time h2, 
+#embed-cumulative-fundraising-over-time h3,
+#embed-cumulative-fundraising-over-time .legend,
+#embed-cumulative-fundraising-over-time [class*="legend"],
+#embed-cumulative-fundraising-over-time [class*="title"],
+#embed-cumulative-fundraising-over-time label,
+#embed-cumulative-fundraising-over-time span {
+  color: #000000 !important;
+}
 #embed-cumulative-fundraising-over-time {
   overflow: hidden;
   width: 100%;

@@ -3,7 +3,16 @@
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
 
-
+#embed-number-of-donations-by-size h1,
+#embed-number-of-donations-by-size h2, 
+#embed-number-of-donations-by-size h3,
+#embed-number-of-donations-by-size .legend,
+#embed-number-of-donations-by-size [class*="legend"],
+#embed-number-of-donations-by-size [class*="title"],
+#embed-number-of-donations-by-size label,
+#embed-number-of-donations-by-size span {
+  color: #000000 !important;
+}
 #embed-number-of-donations-by-size {
   overflow: hidden;
   width: 100%;
