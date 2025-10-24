@@ -2,6 +2,10 @@
 <div class="campaign-chart-embed" id="embed-number-of-donations-by-size">
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
+/* Force black text on right labels */
+#embed-number-of-donations-by-size .text-gray-900 {
+  color: #000000 !important;
+}
 /* Force consistent gray background on category pills */
 #embed-number-of-donations-by-size .bg-gray-200 {
   background-color: #E5E7EB !important;
