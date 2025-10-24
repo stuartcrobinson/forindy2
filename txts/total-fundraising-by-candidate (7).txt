@@ -3,6 +3,11 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+/* Force consistent gray background on category pills */
+#embed-total-fundraising-by-candidate .bg-gray-200 {
+  background-color: #E5E7EB !important;
+}
+
 #embed-total-fundraising-by-candidate h1,
 #embed-total-fundraising-by-candidate h2, 
 #embed-total-fundraising-by-candidate h3,

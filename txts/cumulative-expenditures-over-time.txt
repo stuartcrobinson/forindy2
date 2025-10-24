@@ -2,7 +2,10 @@
 <div class="campaign-chart-embed" id="embed-cumulative-expenditures-over-time">
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
-
+/* Force consistent gray background on category pills */
+#embed-cumulative-expenditures-over-time .bg-gray-200 {
+  background-color: #E5E7EB !important;
+}
 #embed-cumulative-expenditures-over-time h1,
 #embed-cumulative-expenditures-over-time h2, 
 #embed-cumulative-expenditures-over-time h3,
@@ -25,7 +28,7 @@
   transform: scale(0.6);
   transform-origin: top left;
   width: 167%;
-  margin-bottom: -35%;
+  margin-bottom: -31%;
 }
 
 

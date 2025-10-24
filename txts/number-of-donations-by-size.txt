@@ -2,6 +2,10 @@
 <div class="campaign-chart-embed" id="embed-number-of-donations-by-size">
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
+/* Force consistent gray background on category pills */
+#embed-number-of-donations-by-size .bg-gray-200 {
+  background-color: #E5E7EB !important;
+}
 
 #embed-number-of-donations-by-size h1,
 #embed-number-of-donations-by-size h2, 

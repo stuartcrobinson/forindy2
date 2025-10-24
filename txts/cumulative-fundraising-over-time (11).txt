@@ -2,6 +2,10 @@
 <div class="campaign-chart-embed" id="embed-cumulative-fundraising-over-time">
 <script src="https://cdn.tailwindcss.com"></script>
   <style>
+/* Force consistent gray background on category pills */
+#embed-cumulative-fundraising-over-time .bg-gray-200 {
+  background-color: #E5E7EB !important;
+}
 #embed-cumulative-fundraising-over-time h1,
 #embed-cumulative-fundraising-over-time h2, 
 #embed-cumulative-fundraising-over-time h3,
@@ -23,7 +27,7 @@
   transform: scale(0.6); /* adjust this as needed */
   transform-origin: top left;
   width: 166.67%; /* 100 / 0.6 */
-  margin-bottom: -49%; /* (1 - 0.6) × 100 */
+  margin-bottom: -40%; /* (1 - 0.6) × 100 */
 }
 
 
