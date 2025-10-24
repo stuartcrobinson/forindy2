@@ -30,7 +30,14 @@
   margin-bottom: -40%; /* (1 - 0.6) × 100 */
 }
 
-
+/* Force white text in tooltips */
+#embed-cumulative-fundraising-over-time .recharts-tooltip-wrapper,
+#embed-cumulative-fundraising-over-time .recharts-tooltip-wrapper *,
+#embed-cumulative-fundraising-over-time [class*="tooltip"] span,
+#embed-cumulative-fundraising-over-time [class*="tooltip"] p,
+#embed-cumulative-fundraising-over-time [class*="tooltip"] div {
+  color: #FFFFFF !important;
+}
     body { 
       margin: 0; 
       padding: 20px; 

@@ -30,7 +30,14 @@
   width: 200%;
   margin-bottom: -68%;
 }
-
+/* Force white text in tooltips */
+#embed-number-of-donations-by-size .recharts-tooltip-wrapper,
+#embed-number-of-donations-by-size .recharts-tooltip-wrapper *,
+#embed-number-of-donations-by-size [class*="tooltip"] span,
+#embed-number-of-donations-by-size [class*="tooltip"] p,
+#embed-number-of-donations-by-size [class*="tooltip"] div {
+  color: #FFFFFF !important;
+}
 
     body { 
       margin: 0; 

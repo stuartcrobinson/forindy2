@@ -30,7 +30,14 @@
   margin-bottom: -31%;
 }
 
-
+/* Force white text in tooltips */
+#embed-cash-on-hand-over-time .recharts-tooltip-wrapper,
+#embed-cash-on-hand-over-time .recharts-tooltip-wrapper *,
+#embed-cash-on-hand-over-time [class*="tooltip"] span,
+#embed-cash-on-hand-over-time [class*="tooltip"] p,
+#embed-cash-on-hand-over-time [class*="tooltip"] div {
+  color: #FFFFFF !important;
+}
 
     body { 
       margin: 0; 
