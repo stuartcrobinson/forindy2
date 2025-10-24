@@ -30,7 +30,7 @@
   transform: scale(0.5);
   transform-origin: top left;
   width: 200%;
-  margin-bottom: -62%;
+  margin-bottom: -58%;
 }
 /* Force white text in tooltips */
 #embed-total-fundraising-by-candidate .recharts-tooltip-wrapper,
