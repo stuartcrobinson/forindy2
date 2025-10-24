@@ -1,0 +1,528 @@
+<!-- Chart: number-of-donations-by-size -->
+<div class="campaign-chart-embed" id="embed-number-of-donations-by-size">
+<script src="https://cdn.tailwindcss.com"></script>
+  <style>
+
+
+#embed-number-of-donations-by-size {
+  overflow: hidden;
+  width: 100%;
+  display: block;
+  line-height: 0;
+}
+
+#embed-number-of-donations-by-size > * {
+  transform: scale(0.5);
+  transform-origin: top left;
+  width: 200%;
+  margin-bottom: -68%;
+}
+
+
+    body { 
+      margin: 0; 
+      padding: 20px; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #f9fafb; 
+    }
+    .chart-container { 
+      background: white; 
+      padding: 24px; 
+      border-radius: 8px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+      position: relative;
+    }
+    .attribution { 
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .attribution a {
+      color: #6b7280;
+      text-decoration: none;
+    }
+    .attribution a:hover {
+      color: #6b7280;
+    }
+    
+    /* Recharts tooltip wrapper override */
+    .recharts-tooltip-wrapper {
+      z-index: 1000 !important;
+    }
+    
+    /* Explicit tooltip styles (fallback if Tailwind doesn't load in time) */
+    .tooltip-container {
+      background-color: #111827;
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      max-width: 20rem;
+    }
+    .tooltip-container-single {
+      background-color: #111827;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .tooltip-date {
+      font-size: 0.75rem;
+      color: #d1d5db;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    .tooltip-date-single {
+      font-size: 0.75rem;
+      color: #d1d5db;
+    }
+    .tooltip-value {
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .tooltip-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+    .tooltip-item:last-child {
+      margin-bottom: 0;
+    }
+    .tooltip-label-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tooltip-color-box {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 0.125rem;
+      flex-shrink: 0;
+    }
+    .tooltip-label {
+      font-size: 0.75rem;
+    }
+  </style>
+
+
+  <div class="chart-container">
+    <div id="chart-number-of-donations-by-size"></div>
+    
+  </div>
+  
+  <!-- Load React first -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Load PropTypes (required by Recharts) -->
+  <script crossorigin src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
+  
+  <!-- Load react-is (required by Recharts) -->
+  <script crossorigin src="https://unpkg.com/react-is@18/umd/react-is.production.min.js"></script>
+  
+  <!-- Load Recharts from cdnjs (more reliable) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+  
+  <script>
+    // Wait for everything to load, then check dependencies
+    window.addEventListener('load', function() {
+      // Verify all dependencies loaded
+      if (typeof React === 'undefined') {
+        document.getElementById('chart-number-of-donations-by-size').innerHTML = '<div style="color: red; padding: 20px;">Error: React failed to load</div>';
+        return;
+      }
+      if (typeof ReactDOM === 'undefined') {
+        document.getElementById('chart-number-of-donations-by-size').innerHTML = '<div style="color: red; padding: 20px;">Error: ReactDOM failed to load</div>';
+        return;
+      }
+      if (typeof Recharts === 'undefined') {
+        document.getElementById('chart-number-of-donations-by-size').innerHTML = '<div style="color: red; padding: 20px;">Error: Recharts failed to load</div>';
+        return;
+      }
+      
+      const { useState } = React;
+      const { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } = Recharts;
+      
+      
+  // === Bar chart helpers ===
+  function StandaloneBarFilterControls({ data, activeFilter, hoveredFilter, onFilterClick, onFilterHover }) {
+    const POSITION_ORDER = ['mayor', 'city council'];
+    const structure = { positions: {} };
+    const items = Array.isArray(data) ? data : [];
+    
+    items.forEach(item => {
+      const pos = item.position || 'Other';
+      if (!structure.positions[pos]) structure.positions[pos] = { subs: new Set() };
+      if (item.subregion_value) structure.positions[pos].subs.add(item.subregion_value);
+    });
+    
+    const sortedPositions = Object.keys(structure.positions).sort((a,b) => {
+      const ai = POSITION_ORDER.indexOf(a.toLowerCase());
+      const bi = POSITION_ORDER.indexOf(b.toLowerCase());
+      if (ai !== -1 && bi !== -1) return ai - bi;
+      if (ai !== -1) return -1;
+      if (bi !== -1) return 1;
+      return a.localeCompare(b);
+    });
+    
+    const opts = [{ id:'all', label:'All', type:'all' }];
+    sortedPositions.forEach(p => {
+      const pos = structure.positions[p];
+      opts.push({ id:p, label:p, type:'position' });
+      Array.from(pos.subs).sort().forEach(s => {
+        opts.push({ id:`${p}:${s}`, label:s, type:'subregion', parentPosition:p });
+      });
+    });
+
+    return React.createElement(
+      'div',
+      { className:'flex flex-wrap gap-2 items-baseline' },
+      opts.map((f, idx) => {
+        const isActive = activeFilter === f.id;
+        const isHovered = hoveredFilter === f.id;
+        const pieces = [];
+        const showOpen = f.type === 'subregion' && idx > 0 && opts[idx-1].type === 'position';
+        if (showOpen) pieces.push(React.createElement('span', { key:`o-${f.id}`, className:'text-gray-400 dark:text-gray-600 mx-1' }, '('));
+        pieces.push(
+          React.createElement('button', {
+            key:f.id,
+            onClick: () => onFilterClick && onFilterClick(f.id),
+            onMouseEnter: () => onFilterHover && onFilterHover(f.id),
+            onMouseLeave: () => onFilterHover && onFilterHover(null),
+            className:`px-2 py-1 rounded transition-all duration-200 cursor-pointer ${isActive ? 'font-bold text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'} ${!isActive && !isHovered ? 'opacity-70' : 'opacity-100'}`
+          }, f.label)
+        );
+        const next = opts[idx+1];
+        const sameParentNext = next && next.parentPosition === f.parentPosition;
+        if (f.type === 'subregion' && next && sameParentNext) pieces.push(React.createElement('span', { key:`c-${f.id}`, className:'text-gray-400 dark:text-gray-600' }, ','));
+        if (f.type === 'subregion' && next && !sameParentNext) pieces.push(React.createElement('span', { key:`cl-${f.id}`, className:'text-gray-400 dark:text-gray-600 mx-1' }, ')'));
+        if (f.type === 'subregion' && !next) pieces.push(React.createElement('span', { key:`clx-${f.id}`, className:'text-gray-400 dark:text-gray-600 mx-1' }, ')'));
+        return React.createElement(React.Fragment, { key:`frag-${f.id}` }, pieces);
+      })
+    );
+  }
+
+  function matchesBarFilter(item, filterId) {
+    if (filterId === 'all') return true;
+    if (item.position === filterId) return true;
+    if (filterId && filterId.indexOf(':') !== -1) {
+      const parts = filterId.split(':');
+      return item.position === parts[0] && String(item.subregion_value) === String(parts[1]);
+    }
+    return false;
+  }
+  
+  function formatDollars(val) {
+    if (val >= 1000000) return '$' + (val/1000000).toFixed(1) + 'M';
+    if (val >= 1000) return '$' + (val/1000).toFixed(0) + 'K';
+    return '$' + val;
+  }
+
+  function SegmentedBarChart({ data, title, legendLabel, legendOrder, legendColorMap, segmentOrder, activeFilter, hideEndLabels, showLocalFilters, xAxisLabel }) {
+    const { useState, useEffect } = React;
+    const [hoveredSegment, setHoveredSegment] = useState(null);
+    const [hoveredLabel, setHoveredLabel] = useState(null);
+    const [hoveredLabelSource, setHoveredLabelSource] = useState(null);
+    const [isNarrow, setIsNarrow] = useState(false);
+    const [localHoveredFilter, setLocalHoveredFilter] = useState(null);
+    const [localActiveFilter, setLocalActiveFilter] = useState(activeFilter || 'all');
+
+    useEffect(() => {
+      const check = () => setIsNarrow(window.innerWidth < 768);
+      check();
+      window.addEventListener('resize', check);
+      return () => window.removeEventListener('resize', check);
+    }, []);
+
+    const getDisplayLabel = (label) => {
+      if (!isNarrow) return label;
+      const parts = String(label || '').split(' ');
+      return parts[parts.length - 1];
+    };
+
+    const currentActiveFilter = showLocalFilters ? localActiveFilter : activeFilter;
+    const filtered = (currentActiveFilter === 'all' ? data : data.filter(d => matchesBarFilter(d, currentActiveFilter)));
+
+    // Build legend items from data
+    const allSegs = {};
+    data.forEach(item => (item.segments || []).forEach(seg => {
+      const label = seg.label;
+      if (!allSegs[label]) allSegs[label] = seg.color;
+    }));
+    
+    const legendItems = Object.entries(allSegs).map(([label, color]) => ({
+      label,
+      color: (legendColorMap && legendColorMap[label]) || color
+    })).sort((a,b) => {
+      if (Array.isArray(legendOrder) && legendOrder.length) {
+        const ai = legendOrder.indexOf(a.label);
+        const bi = legendOrder.indexOf(b.label);
+        const ap = (ai === -1) ? Number.MAX_SAFE_INTEGER : ai;
+        const bp = (bi === -1) ? Number.MAX_SAFE_INTEGER : bi;
+        if (ap !== bp) return ap - bp;
+      }
+      return a.label.localeCompare(b.label);
+    });
+
+    const withData = filtered.filter(it => (it.segments || []).reduce((s,seg)=>s+seg.value,0) > 0);
+    const withoutData = filtered.filter(it => (it.segments || []).reduce((s,seg)=>s+seg.value,0) === 0);
+    const groups = [];
+    const seen = new Set();
+    withData.forEach(it => {
+      const key = it.subregion_value ? `${it.position} ${it.subregion_value}` : it.position;
+      if (!seen.has(key)) { seen.add(key); groups.push([key, []]); }
+      groups.find(g => g[0] === key)[1].push(it);
+    });
+    const maxTotal = Math.max(...withData.map(it => (it.segments || []).reduce((s,seg)=>s+seg.value,0)), 1);
+
+    const processedLabels = withData.map(item => getDisplayLabel(item.label));
+    const longestNameLength = Math.max(...processedLabels.map(label => label.length), 0);
+    const nameWidth = Math.max(longestNameLength * 8 + 8, 80);
+
+    const legendBlock = legendItems.length > 1
+      ? React.createElement(
+          'div',
+          { className:'mb-6 pb-4 border-b border-gray-200 dark:border-gray-700' },
+          legendLabel ? React.createElement('div', { className:'text-xs font-semibold text-gray-600 dark:text-gray-400 mb-3 uppercase' }, legendLabel) : null,
+          React.createElement(
+            'div',
+            { className:'flex flex-wrap gap-4' },
+            legendItems.map((item, idx) => {
+              const isHighlighted = hoveredLabel === item.label;
+              return React.createElement(
+                'div',
+                {
+                  key:idx,
+                  className:`flex items-center gap-2 transition-all duration-200 cursor-pointer ${hoveredLabel && !isHighlighted ? 'opacity-50' : 'opacity-100'}`,
+                  onMouseEnter: () => { setHoveredLabel(item.label); setHoveredLabelSource('legend'); },
+                  onMouseLeave: () => { setHoveredLabel(null); setHoveredLabelSource(null); }
+                },
+                React.createElement('div', { className:'w-4 h-4 flex-shrink-0', style:{ backgroundColor:item.color } }),
+                React.createElement(
+                  'span',
+                  { className:'text-sm text-gray-900 dark:text-gray-100 relative inline-block' },
+                  React.createElement('span', { className:'font-bold invisible','aria-hidden':'true' }, item.label),
+                  React.createElement('span', { className:`absolute inset-0 ${isHighlighted ? 'font-bold' : ''}` }, item.label)
+                )
+              );
+            })
+          )
+        )
+      : null;
+
+    // X-axis label (if provided)
+    const xAxisLabelBlock = xAxisLabel 
+      ? React.createElement(
+          'div',
+          { className:'text-center mt-6 mb-2' },
+          React.createElement('span', { 
+            className:'text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider'
+          }, xAxisLabel)
+        )
+      : null;
+
+    return React.createElement(
+      'div',
+      { className:'w-full' },
+      React.createElement(
+        'div',
+        { className:'flex justify-between items-start mb-6' },
+        title ? React.createElement('h2', { className:'text-3xl font-bold text-gray-900 dark:text-gray-100' }, title) : null
+      ),
+      legendBlock,
+      React.createElement(
+        'div',
+        { className:'space-y-8' },
+        groups.map(([contestName, items]) => {
+          const contestNoData = withoutData.filter(it => {
+            const key = it.subregion_value ? `${it.position} ${it.subregion_value}` : it.position;
+            return key === contestName;
+          });
+          
+          const allContestItems = [...items, ...contestNoData].sort((a, b) => {
+            const getLastName = (fullName) => {
+              const parts = String(fullName || '').trim().split(/\s+/);
+              return parts[parts.length - 1].toLowerCase();
+            };
+            return getLastName(a.label).localeCompare(getLastName(b.label));
+          });
+          
+          return React.createElement(
+            'div',
+            { key:contestName },
+            React.createElement(
+              'div',
+              { className:'flex items-center gap-4 mb-3' },
+              React.createElement('span', { className:'inline-block text-xs font-bold text-gray-800 dark:text-gray-100 uppercase tracking-wide px-3 py-1.5 bg-gray-200 dark:bg-gray-700 rounded' }, contestName),
+              React.createElement('div', { className:'flex-1 h-px bg-gray-300 dark:bg-gray-600' })
+            ),
+            React.createElement(
+              'div',
+              { className:'space-y-4' },
+              allContestItems.map((item, idx) => {
+                const total = (item.segments || []).reduce((s,seg)=>s+seg.value,0);
+                const hasNoData = total === 0;
+                const percent = (total / maxTotal) * 100;
+                const isCand = hoveredSegment && hoveredSegment.candidateLabel === item.label;
+                const isHovLab = hoveredLabel && (item.segments || []).some(s => s.label === hoveredLabel);
+                const shouldDim = (hoveredSegment && !isCand) || (hoveredLabel && !isHovLab) || (localHoveredFilter && !matchesBarFilter(item, localHoveredFilter));
+                const displayLabel = getDisplayLabel(item.label);
+                const uniqueRowId = `${contestName}-${String(item.label || '').replace(/\s+/g, '-')}`;
+                
+                if (hasNoData) {
+                  return React.createElement(
+                    'div',
+                    { key:idx, className:`flex items-center gap-4 transition-opacity duration-200 ${shouldDim ? 'opacity-40' : 'opacity-100'}` },
+                    item.imageUrl ? React.createElement('img', { 
+                      src:item.imageUrl, 
+                      className:'w-10 h-10 object-cover rounded flex-shrink-0',
+                      alt:item.label
+                    }) : null,
+                    React.createElement(
+                      'div',
+                      { className:'flex items-center flex-shrink-0', style:{ width:`${nameWidth}px` } },
+                      item.linkUrl
+                        ? React.createElement('a', { 
+                            href:item.linkUrl, 
+                            target:'_blank', 
+                            rel:'noopener noreferrer', 
+                            className:'text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer hover:underline'
+                          }, displayLabel)
+                        : React.createElement('div', { className:'text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap overflow-hidden text-ellipsis' }, displayLabel)
+                    ),
+                    React.createElement('div', { className:'text-xs text-gray-500 dark:text-gray-400 w-3 flex-shrink-0 text-right' }, item.leftLabel || ''),
+                    React.createElement(
+                      'div',
+                      { className:'flex-1 min-w-0 relative flex items-center' },
+                      React.createElement(
+                        'div',
+                        { className:'flex h-10 w-full items-center' },
+                        React.createElement('div', { className:'text-xs italic text-gray-400 dark:text-gray-500' }, 'No financial data submitted')
+                      )
+                    ),
+                    React.createElement('div', { className:'w-20 flex-shrink-0' })
+                  );
+                }
+                
+                return React.createElement(
+                  'div',
+                  { key:idx, className:`flex items-center gap-4 transition-opacity duration-200 ${shouldDim ? 'opacity-40' : 'opacity-100'}` },
+                  item.imageUrl ? React.createElement('img', { 
+                    src:item.imageUrl, 
+                    className:'w-10 h-10 object-cover rounded flex-shrink-0',
+                    alt:item.label
+                  }) : null,
+                  React.createElement(
+                    'div',
+                    { className:'flex items-center flex-shrink-0', style:{ width:`${nameWidth}px` } },
+                    item.linkUrl
+                      ? React.createElement('a', { 
+                          href:item.linkUrl, 
+                          target:'_blank', 
+                          rel:'noopener noreferrer', 
+                          className:'text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap overflow-hidden text-ellipsis cursor-pointer hover:underline'
+                        }, displayLabel)
+                      : React.createElement('div', { className:'text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap overflow-hidden text-ellipsis' }, displayLabel)
+                  ),
+                  React.createElement('div', { className:'text-xs text-gray-500 dark:text-gray-400 w-3 flex-shrink-0 text-right' }, item.leftLabel || ''),
+                  React.createElement(
+                    'div',
+                    { className:'flex-1 min-w-0 relative flex items-center' },
+                                      React.createElement(
+                        'div',
+                        { className:'flex h-10 w-full' },
+                        (Array.isArray(segmentOrder) && segmentOrder.length
+                          ? [...(item.segments || [])].sort((a, b) => {
+                              const ai = segmentOrder.indexOf(a.label);
+                              const bi = segmentOrder.indexOf(b.label);
+                              const ap = (ai === -1) ? Number.MAX_SAFE_INTEGER : ai;
+                              const bp = (bi === -1) ? Number.MAX_SAFE_INTEGER : bi;
+                              return ap - bp;
+                            })
+                          : (item.segments || [])
+                        ).map((seg, sIdx) => {
+                          const segPercent = total > 0 ? (seg.value / total) * 100 : 0;
+                          const barWidthPercent = (total / maxTotal) * 100;
+                          const segmentWidth = (segPercent / 100) * barWidthPercent;
+                          const isSegHov = hoveredSegment && hoveredSegment.candidateLabel === item.label && hoveredSegment.segmentLabel === seg.label;
+                          const isLabelHov = hoveredLabel && hoveredLabel === seg.label && (!hoveredSegment || hoveredLabelSource !== 'segment');
+                          const highlight = isSegHov || isLabelHov;
+                          return React.createElement('div', {
+                            key:sIdx,
+                            className:'transition-all duration-200 cursor-pointer relative',
+                            style:{ 
+                              width:`${segmentWidth}%`, 
+                              backgroundColor: seg.color,
+                              opacity: hoveredLabel && hoveredLabel !== seg.label ? 0.3 : 1,
+                              filter: highlight ? 'brightness(1.1)' : 'none',
+                              transform: highlight ? 'scaleY(1.05)' : 'scaleY(1)'
+                            },
+                            onMouseEnter: () => {
+                              setHoveredSegment({ candidateLabel:item.label, segmentLabel:seg.label });
+                              setHoveredLabel(seg.label);
+                              setHoveredLabelSource('segment');
+                            },
+                            onMouseLeave: () => {
+                              setHoveredSegment(null);
+                              setHoveredLabel(null);
+                              setHoveredLabelSource(null);
+                            }
+                          },
+                          isSegHov && hoveredLabelSource === 'segment' && seg.tooltipText ? React.createElement(
+                            'div',
+                            { 
+                              className:'absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white px-3 py-2 rounded shadow-lg z-20 whitespace-nowrap'
+                            },
+                            React.createElement('p', { className:'text-xs font-semibold' }, seg.label),
+                            React.createElement('p', { className:'text-xs text-gray-300' }, seg.tooltipText)
+                          ) : null);
+                        })
+                      ),
+                    !hideEndLabels ? React.createElement(
+                      'div',
+                      {
+                        className:'absolute text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap ml-2',
+                        style:{ left: `${(total / maxTotal) * 100}%` }
+                      },
+                      item.formattedTotal || formatDollars(total)
+                    ) : null
+                  ),
+                  React.createElement('div', { className:'w-20 flex-shrink-0' })
+                );
+              })
+            )
+          );
+        })
+      ),
+      xAxisLabelBlock,
+      showLocalFilters ? React.createElement(
+        'div',
+        { className:'mt-3 pt-3 border-t border-gray-200 dark:border-gray-700' },
+        React.createElement(StandaloneBarFilterControls, {
+          data,
+          activeFilter: localActiveFilter,
+          hoveredFilter: localHoveredFilter,
+          onFilterClick: (fid) => setLocalActiveFilter(fid),
+          onFilterHover: (fid) => setLocalHoveredFilter(fid)
+        })
+      ) : null
+    );
+  }
+
+      
+      const data = [{"label":"Anjanée Bell","imageUrl":"data:image/jpeg;base64,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","position":"MAYOR","subregion_value":null,"linkUrl":"https://dcoftp.net/boe-ftp/Campaign%20Finance/Open%20Committees/Candidate%20Committees/Bell_Anjanee/","segments":[{"label":"≤$50","value":9,"color":"#ead008ff","tooltipText":"9 donations (8.7%)"},{"label":"$51-250","value":71,"color":"#22c55e","tooltipText":"71 donations (68.9%)"},{"label":"$251-1000","value":16,"color":"#3b82f6","tooltipText":"16 donations (15.5%)"},{"label":">$1000","value":7,"color":"#ef8044ff","tooltipText":"7 donations (6.8%)"}],"formattedTotal":"103"},{"label":"Leo Williams","imageUrl":"data:image/jpeg;base64,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","position":"MAYOR","subregion_value":null,"linkUrl":"https://cf.ncsbe.gov/CFOrgLkup/DocumentGeneralResult/?SID=133-647481-C-001&OGID=51816","segments":[{"label":"≤$50","value":4,"color":"#ead008ff","tooltipText":"4 donations (7.0%)"},{"label":"$51-250","value":32,"color":"#22c55e","tooltipText":"32 donations (56.1%)"},{"label":"$251-1000","value":16,"color":"#3b82f6","tooltipText":"16 donations (28.1%)"},{"label":">$1000","value":5,"color":"#ef8044ff","tooltipText":"5 donations (8.8%)"}],"formattedTotal":"57"},{"label":"DeDreana Freeman","imageUrl":"data:image/jpeg;base64,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","position":"CITY COUNCIL","subregion_value":"I","linkUrl":"https://cf.ncsbe.gov/CFOrgLkup/DocumentGeneralResult/?SID=133-021766-C-001&OGID=34833","segments":[{"label":"≤$50","value":58,"color":"#ead008ff","tooltipText":"58 donations (54.2%)"},{"label":"$51-250","value":39,"color":"#22c55e","tooltipText":"39 donations (36.4%)"},{"label":"$251-1000","value":8,"color":"#3b82f6","tooltipText":"8 donations (7.5%)"},{"label":">$1000","value":2,"color":"#ef8044ff","tooltipText":"2 donations (1.9%)"}],"formattedTotal":"107"},{"label":"Matt Kopac","imageUrl":"data:image/jpeg;base64,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","position":"CITY COUNCIL","subregion_value":"I","linkUrl":"https://cf.ncsbe.gov/CFOrgLkup/DocumentGeneralResult/?SID=DUR-ELG53M-C-001&OGID=56375","segments":[{"label":"≤$50","value":78,"color":"#ead008ff","tooltipText":"78 donations (27.9%)"},{"label":"$51-250","value":160,"color":"#22c55e","tooltipText":"160 donations (57.1%)"},{"label":"$251-1000","value":37,"color":"#3b82f6","tooltipText":"37 donations (13.2%)"},{"label":">$1000","value":5,"color":"#ef8044ff","tooltipText":"5 donations (1.8%)"}],"formattedTotal":"280"},{"label":"Shanetta Burris","imageUrl":"data:image/jpeg;base64,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","position":"CITY COUNCIL","subregion_value":"II","linkUrl":"https://dcoftp.net/boe-ftp/Campaign%20Finance/Open%20Committees/Candidate%20Committees/Burris_Shanetta/","segments":[{"label":"≤$50","value":15,"color":"#ead008ff","tooltipText":"15 donations (44.1%)"},{"label":"$51-250","value":18,"color":"#22c55e","tooltipText":"18 donations (52.9%)"},{"label":"$251-1000","value":1,"color":"#3b82f6","tooltipText":"1 donation (2.9%)"}],"formattedTotal":"34"},{"label":"Mark-Anthony Middleton","imageUrl":"data:image/jpeg;base64,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","position":"CITY COUNCIL","subregion_value":"II","linkUrl":"https://cf.ncsbe.gov/CFOrgLkup/DocumentGeneralResult/?SID=133-7Z5134-C-001&OGID=56721","segments":[{"label":"≤$50","value":25,"color":"#ead008ff","tooltipText":"25 donations (46.3%)"},{"label":"$51-250","value":19,"color":"#22c55e","tooltipText":"19 donations (35.2%)"},{"label":"$251-1000","value":10,"color":"#3b82f6","tooltipText":"10 donations (18.5%)"}],"formattedTotal":"54"},{"label":"Chelsea Cook","imageUrl":"data:image/jpeg;base64,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","position":"CITY COUNCIL","subregion_value":"III","linkUrl":"https://dcoftp.net/boe-ftp/Campaign%20Finance/Open%20Committees/Candidate%20Committees/Cook_Chelsea/","segments":[{"label":"≤$50","value":11,"color":"#ead008ff","tooltipText":"11 donations (28.9%)"},{"label":"$51-250","value":19,"color":"#22c55e","tooltipText":"19 donations (50.0%)"},{"label":"$251-1000","value":7,"color":"#3b82f6","tooltipText":"7 donations (18.4%)"},{"label":">$1000","value":1,"color":"#ef8044ff","tooltipText":"1 donation (2.6%)"}],"formattedTotal":"38"},{"label":"Diana Medoff","imageUrl":"data:image/jpeg;base64,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","position":"CITY COUNCIL","subregion_value":"III","linkUrl":"https://cf.ncsbe.gov/CFOrgLkup/DocumentGeneralResult/?SID=001-AM9MI7-C-001&OGID=56651","segments":[{"label":"≤$50","value":13,"color":"#ead008ff","tooltipText":"13 donations (10.3%)"},{"label":"$51-250","value":79,"color":"#22c55e","tooltipText":"79 donations (62.7%)"},{"label":"$251-1000","value":31,"color":"#3b82f6","tooltipText":"31 donations (24.6%)"},{"label":">$1000","value":3,"color":"#ef8044ff","tooltipText":"3 donations (2.4%)"}],"formattedTotal":"126"}];
+      const chartProps = {"title":"Number of Donations by Size","activeFilter":"all","xAxisLabel":"Number of Donations","showLocalFilters":false,"legendLabel":"Contribution Sizes","hideEndLabels":false,"legendOrder":["≤$50","$51-250","$251-1000",">$1000"],"legendColorMap":{"≤$50":"#ead008ff","$51-250":"#22c55e","$251-1000":"#3b82f6",">$1000":"#ef8044ff"}};
+      
+      const root = ReactDOM.createRoot(document.getElementById('chart-number-of-donations-by-size'));
+      root.render(React.createElement(SegmentedBarChart, {
+        data: data,
+        ...chartProps
+      }));
+    });
+  </script>
+</div>
+<!-- End Chart: number-of-donations-by-size -->
